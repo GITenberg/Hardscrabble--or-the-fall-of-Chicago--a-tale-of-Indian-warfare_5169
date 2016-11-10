@@ -1,0 +1,61 @@
+sudo: required
+dist: trusty
+language: ruby
+
+before_install:
+before_install:
+- gem install asciidoctor -v 1.5.2
+- gem install tilt
+- sudo pip install git+https://github.com/gitenberg-dev/gitberg
+- sudo pip install pillow
+- sudo pip install cssutils
+- sudo pip install docutils
+- sudo pip install roman
+- sudo pip install git+https://github.com/gitenberg-dev/pg-epubmaker
+script:
+- VERSION=`ruby -e "require 'yaml'; meta = YAML.load_file('metadata.yaml'); puts meta['_version'];"`
+- git clone https://github.com/gitenberg-dev/asciidoctor-htmlbook.git
+- sudo pip install -r asciidoctor-htmlbook/gitberg-machine/requirements.txt
+
+- /usr/bin/python -c "from gitenberg import travis; travis.build_epub()"
+- ebook-convert book.epub book.mobi
+- xvfb-run ebook-convert book.epub book.pdf
+branches:
+  only:
+  - master
+notifications:
+  webhooks:
+    urls:
+      - https://unglue.it/api/travisci/webhook
+    on_success: always
+    on_failure: never
+    on_start: never
+deploy:
+  skip_cleanup: true
+  provider: releases
+  api_key:
+    secure: sa4AG9cpbmmDSlOAwHQGP4vVqcZwpCEUF07czGQk9ITX9enLpTYuD57aMS4VLY80WuEV3AF1csQWzZcTccjyJbLsA1MOrCgDb1m+FfnqR8B5p8T4pSXFspjZT1nivqXsIY0Rl6VbzhHGTp8tE1fERcbWIBAVyntQSqq9zYKOe9FFPfzZQgT3a+u9xbqLf3yWEf4E6/Jj3aJY4Vz5wuSjojrx/wU7cJ9i7bRzH62n5yIo1V5ngGgGK60VLRItw+STIFEvOS2oHEY1WZ+WV5rNgVqpI8j6zScy/4on7UqsOxoALI2w/+g3hRvU8YSLVvs/YkG4c369kcek0jgwh0DxAAv6lf3DQeuUBRljokXAg9FBG2qLaHmS5QS7R1XfXm/E4q5HObmLbTFcR3wAYS4BRAOd+W0fI048RB5LYmSyhkl9WjDuBVMpkyp0UnekzAGtovUIYC56w49OM2En+BO4dHIP57TZulxaJB7yJx0U23mHO1RMhEZodYCiid6/sID1fYKGh3zYeV5eZ0BAXt5zmC77zAuBW74dZ/AS18DiIpiOXr6PPeza/jbfWXg2sv2pqQT/DcCJHLpkQ1vM7KLMj3+J1em2BKXelAk2r8TghglTL4N3MgnF8+8t7y+yv9QxUOCmIPG3V6KVHWwwL+ONg+m+8xYUSkWIJFDVKyLyO6M=
+  file:
+    - book.epub
+    - book.mobi
+    - book.pdf
+  "on":
+    repo: GITenberg/Hardscrabble--or-the-fall-of-Chicago--a-tale-of-Indian-warfare_5169
+addons:
+  apt:
+    packages:
+    - xsltproc
+    - xvfb
+    - calibre
+    - python-pip
+    - git
+    - python-dev
+    - libjpeg-dev
+    - libpng-dev
+    - libfreetype6
+    - libfreetype6-dev
+    - zlib1g-dev
+    - python-lxml
+    - libxml2-dev
+    - libxslt1-dev
+    - tidy
